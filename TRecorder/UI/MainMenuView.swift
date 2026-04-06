@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainMenuView: View {
     @ObservedObject var model: Model
@@ -17,7 +18,7 @@ struct MainMenuView: View {
                 Spacer()
                 
                 NavigationLink(destination: {
-                    NewGameView().environmentObject(Model())
+                    NewGameView().environmentObject(model)
                 }, label: {
                     Text("Start game").font(.title2)
                 })
@@ -25,7 +26,7 @@ struct MainMenuView: View {
                 Spacer()
                 
                 NavigationLink(destination: {
-                    HistoryView().environmentObject(Model())
+                    HistoryView().environmentObject(model)
                 }, label: {
                     Text("History").font(.title2)
                 })

@@ -5,23 +5,17 @@
 //  Created by Oleksandr Bolbat on 21.03.2026.
 //
 
-import SwiftData
 import SwiftUI
+import SwiftData
 import Combine
 
 @MainActor
 class Model: ObservableObject {
-    var objectWillChange: ObservableObjectPublisher
     let storage: ModelContainer
     private let fetchDescriptor: FetchDescriptor<GameHistory>
-    var teams: [GameHistory]
-    
-    @State static var gameData: GameData = GameData([])
-    @State static var playerMove: PlayerMove = PlayerMove()
-    
-    init() {
-        self.objectWillChange = ObservableObjectPublisher()
+        var games: [GameHistory]
         
+    init() {
         self.storage = {
             do {
                 return try ModelContainer(
@@ -34,30 +28,31 @@ class Model: ObservableObject {
         }()
         
         self.fetchDescriptor = FetchDescriptor<GameHistory>(sortBy: [SortDescriptor(\GameHistory.date)])
-        self.teams = []
+        self.games = []
         self.update()
     }
     
     func update() {
-        teams = {
+        games = {
             do {
-                return try storage.mainContext.fetch(fetchDescriptor)
+                return try storage.mainContext.fetch(fetchDescriptor).reversed()
             } catch {
                 return []
             }
         }()
     }
     
-    func addTeamToStorage(_ game: GameHistory) {
+    func addGameToStorage(_ game: GameHistory) {
         storage.mainContext.insert(game)
         update()
         reset()
     }
     
-    func deleteTeam(at offsets: IndexSet) {
+    func deleteGame(at offsets: IndexSet) {
         for index in offsets {
             do {
                 storage.mainContext.delete(try storage.mainContext.fetch(fetchDescriptor)[index])
+                update()
             } catch {
                 fatalError("Failed to delete team")
             }
@@ -65,14 +60,9 @@ class Model: ObservableObject {
     }
     
     @Published var rootId: UUID = UUID()
-    private var resetter: Bool = true {
-        didSet {
-            rootId = UUID()
-        }
-    }
     
     func reset() {
-        resetter.toggle()
+        rootId = UUID()
     }
     
     static func trimmedString(_ string: String) -> String {

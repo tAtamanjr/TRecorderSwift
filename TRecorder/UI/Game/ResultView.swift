@@ -28,7 +28,7 @@ struct ResultView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {
                         withAnimation {
-                            model.reset()
+                            model.addGameToStorage(gameHistory)
                         }
                     }) {
                         Text("End")
@@ -54,6 +54,10 @@ struct PlayerData: View {
             }
             HStack {
                 Text("Score: " + player.score.reduce(0, +).description)
+                Spacer()
+            }
+            HStack {
+                Text("Score: " + player.score.description)
                 Spacer()
             }
         }.padding()

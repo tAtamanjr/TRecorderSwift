@@ -45,3 +45,13 @@ func resultPreview() -> any View {
     
     return ResultView(gameHistory: gameHistory).environmentObject(Model())
 }
+
+func gameHistoryPreview() -> any View {
+    let gameHistory: GameHistory = GameHistory([])
+    
+    gameHistory.players.append(PlayerHistory("John", [15, 5, 7]))
+    gameHistory.players.append(PlayerHistory("Max", [10, 1, 6]))
+    gameHistory.players.append(PlayerHistory("David", [13, 6, 3]))
+    
+    return GameHistoryView(gameHistory: gameHistory).environmentObject(Model())
+}
