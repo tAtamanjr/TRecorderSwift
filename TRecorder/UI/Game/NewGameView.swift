@@ -11,34 +11,26 @@ struct NewGameView: View {
     @EnvironmentObject var model: Model
     @Environment(\.dismiss) var dismiss
     
-    @State var name: String = ""
-    @State var players: [String] = []
-    
     var body: some View {
         NavigationStack {
             List {
                 Section("Players") {
-                    ForEach(players, id: \.self) { player in
+                    ForEach(model.newGamePlayers, id: \.self) { player in
                         Text(player)
-                    }
-                    .onDelete(perform: removePlayer)
-                    if (players.count < 4) {
+                    }.onDelete(perform: model.removePlayer)
+                    if (model.newGamePlayers.count < 4) {
                         HStack {
-                            TextField("Name", text: $name).disableAutocorrection(true)
+                            TextField("Name", text: $model.newPlayerName).disableAutocorrection(true)
                             
                             Spacer()
                             
                             Button(action: {
                                 withAnimation {
-                                    players.append(name)
-                                    name = ""
+                                    model.addNewPlayer()
                                 }
                             }, label: {
                                 Image(systemName: "plus")
-                            }).disabled(
-                                Model.blankString(name) ||
-                                players.contains(Model.trimmedString(name))
-                            )
+                            }).disabled(model.cannotAddNewPlayer())
                         }
                     }
                 }
@@ -57,17 +49,13 @@ struct NewGameView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     NavigationLink(destination: {
-                        GameTurnView(gameData: GameData(players)).environmentObject(model)
+                        GameTurnView(gameData: GameData(model.newGamePlayers)).environmentObject(model)
                     }, label: {
                         Text("Start")
-                    }).disabled(players.count < 2 || players.count > 4)
+                    }).disabled(model.cannotStartGame())
                 }
             }
         }
-    }
-    
-    func removePlayer(at offsets: IndexSet) {
-        players.remove(atOffsets: offsets)
     }
 }
 

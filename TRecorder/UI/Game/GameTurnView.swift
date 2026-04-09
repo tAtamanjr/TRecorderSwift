@@ -13,7 +13,6 @@ struct GameTurnView: View {
     @State var gameData: GameData
     @State var playerMove: PlayerMove = PlayerMove()
     @State var input: Int = 0
-    @State private var isPushed: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -37,17 +36,17 @@ struct GameTurnView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("\(gameData.name)'s Turn").font(.title)
+                    Text("\(model.gameData!.currentPlayerName)'s Turn").font(.title)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: {
-                        playerMove.reset()
+                        model.resetGameTurnData()
                     }, label: {
                         Text("Reset")
                     })
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    if (gameData.skip && gameData.pool == 0) {
+                    if (model.showResultView()) {
                         NavigationLink(destination: {
                             ResultView(gameHistory: GameHistory(gameData.players)).environmentObject(model)
                         }, label: {
@@ -56,15 +55,11 @@ struct GameTurnView: View {
                     } else {
                         Button(action: {
                             withAnimation {
-                                gameData.score += playerMove.getScoreChange(gameData.pool)
-                                gameData.dices += playerMove.diceChange
-                                gameData.pool += playerMove.poolChange
-                                playerMove.reset()
-                                gameData.nextPlayer()
+                                model.submitPlayersMove()
                             }
                         }) {
                             Text("Next")
-                        }.disabled(playerMove.endTurn && gameData.pool - playerMove.penalty.count > 0)
+                        }.disabled(model.cannotSubmitPlayersMove())
                     }
                 }
             }
@@ -74,12 +69,12 @@ struct GameTurnView: View {
     private var playersDataView: some View {
         VStack {
             HStack {
-                ForEach(gameData.players) { player in
+                ForEach(model.gameData!.players) { player in
                     VStack {
                         Text(player.name).padding(.bottom, 2).font(.title3)
                         player.name != gameData.name
-                        ? Text("Dices: \(player.dices)")
-                        : Text("Dices: \(player.dices + playerMove.penalty.count - (playerMove.score != -1 ? 1 : 0))")
+                        ? Text("Dices: \(player.dicesLeft)")
+                        : Text("Dices: \(player.dicesLeft + model.penalty.count - (model.score != -1 ? 1 : 0))")
                         Text("Score:")
                         Text(player.score.reduce(0, +).description)
                     }.padding(4)

@@ -11,33 +11,34 @@ import SwiftData
 @Model
 class GameData {
     var players: [Player]
-    var name: String {
-        get { return players[playerToMove].name }
+    var dicesInThePool: Int
+    var currentPlayer: Int
+    
+    var currentPlayerName: String {
+        get { return players[currentPlayer].name }
     }
-    var dices: Int {
-        set { players[playerToMove].dices = newValue }
-        get { return players[playerToMove].dices }
+    var currentPlayerScore: [Int] {
+        set { players[currentPlayer].score = newValue }
+        get { return players[currentPlayer].score }
     }
-    var score: [Int] {
-        set { players[playerToMove].score = newValue }
-        get { return players[playerToMove].score }
+    var currentPlayerDicesCount: Int {
+        set { players[currentPlayer].dicesLeft = newValue }
+        get { return players[currentPlayer].dicesLeft }
     }
-    var skip: Bool {
-        set { players[playerToMove].skip = newValue }
+    var playersSkippedMove: Bool {
+        set { players[currentPlayer].skippedTurn = newValue }
         get {
             for player in players {
-                if (player.skip == false) { return false }
+                if (player.skippedTurn == false) { return false }
             }
             return true
         }
     }
-    var pool: Int
-    var playerToMove: Int
     
     init(_ names: [String]) {
         self.players = []
-        self.pool = (names.count == 2) ? 38 : (56 - 7 * names.count)
-        self.playerToMove = 0
+        self.dicesInThePool = (names.count == 2) ? 38 : (56 - 7 * names.count)
+        self.currentPlayer = 0
         
         for name in names {
             players.append(Player(name, names.count))
@@ -45,22 +46,22 @@ class GameData {
     }
     
     func nextPlayer() {
-        playerToMove = (playerToMove + 1) % players.count
+        currentPlayer = (currentPlayer + 1) % players.count
     }
 }
 
 struct Player: Codable, Identifiable {
     var id: UUID
     var name: String
-    var dices: Int
+    var dicesLeft: Int
     var score: [Int]
-    var skip: Bool
+    var skippedTurn: Bool
     
     init(_ name: String, _ playersAmount: Int) {
         self.id = UUID()
         self.name = name
-        self.dices = (playersAmount == 2) ? 9 : 7
+        self.dicesLeft = (playersAmount == 2) ? 9 : 7
         self.score = []
-        self.skip = false
+        self.skippedTurn = false
     }
 }
