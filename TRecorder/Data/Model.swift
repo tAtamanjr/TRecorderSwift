@@ -15,7 +15,7 @@ final class Model: ObservableObject {
     @Published var path: NavigationPath
     
     // Storage
-    let storage: ModelContainer
+    let container: ModelContainer
     private let fetchDescriptor: FetchDescriptor<GameHistory>
     var games: [GameHistory]
         
@@ -34,19 +34,10 @@ final class Model: ObservableObject {
     @Published var bonus: Int?
     @Published var skipTurn: Bool
     
-    init() {
+    init(_ container: ModelContainer) {
         self.path = NavigationPath()
         
-        self.storage = {
-            do {
-                return try ModelContainer(
-                    for: GameHistory.self,
-                    configurations: ModelConfiguration()
-                )
-            } catch {
-                fatalError("Failed to create container")
-            }
-        }()
+        self.container = container
         self.fetchDescriptor = FetchDescriptor<GameHistory>(sortBy: [SortDescriptor(\GameHistory.date)])
         self.games = []
         
@@ -79,10 +70,10 @@ extension Model {
 
 // Storage
 extension Model {
-    func loadFromStorage() {
+    func loadFromContainer() {
         games = {
             do {
-                return try storage.mainContext.fetch(fetchDescriptor).reversed()
+                return try container.mainContext.fetch(fetchDescriptor).reversed()
             } catch {
                 return []
             }
@@ -90,16 +81,16 @@ extension Model {
     }
     
     func addGameToStorage(_ game: GameHistory) {
-        storage.mainContext.insert(game)
-        loadFromStorage()
+        container.mainContext.insert(game)
+        loadFromContainer()
         clearPath()
     }
     
-    func deleteGameFromStorage(at offsets: IndexSet) {
+    func deleteGameFromContainer(at offsets: IndexSet) {
         for index in offsets {
             do {
-                storage.mainContext.delete(try storage.mainContext.fetch(fetchDescriptor)[index])
-                loadFromStorage()
+                container.mainContext.delete(try container.mainContext.fetch(fetchDescriptor)[index])
+                loadFromContainer()
             } catch {
                 fatalError("Failed to delete team")
             }

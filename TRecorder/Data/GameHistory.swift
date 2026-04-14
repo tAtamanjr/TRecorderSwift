@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
-class GameHistory {
+final class GameHistory {
     var id: UUID
     var date: Date
     var players: [PlayerHistory]
@@ -27,7 +27,8 @@ class GameHistory {
     }
 }
 
-struct PlayerHistory: Codable, Identifiable {
+@Model
+final class PlayerHistory {
     var id: UUID
     var name: String
     var score: [Int]

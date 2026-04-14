@@ -193,5 +193,5 @@ struct GameTurnView: View {
 }
 
 #Preview {
-    gameTurnPreview()
+    Previews.gameTurnPreview()
 }

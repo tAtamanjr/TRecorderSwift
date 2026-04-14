@@ -10,9 +10,25 @@ import SwiftData
 
 @main
 struct TRecorderApp: App {
+    let container: ModelContainer
+    @StateObject private var model: Model
+
+    init() {
+        do {
+            let container = try ModelContainer(
+                for: GameHistory.self,
+                configurations: ModelConfiguration()
+            )
+            self.container = container
+            _model = StateObject(wrappedValue: Model(container))
+        } catch {
+            fatalError("Failed to create app container: \(error)")
+        }
+    }
+    
     var body: some Scene {
         WindowGroup {
-            MainMenuView(model: Model())
-        }.modelContainer(for: GameHistory.self)
+            MainMenuView().environmentObject(model)
+        }.modelContainer(container)
     }
 }

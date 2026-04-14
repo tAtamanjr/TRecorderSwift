@@ -40,7 +40,7 @@ struct GameResultView: View {
 }
 
 #Preview {
-    gameResultPreview()
+    Previews.gameResultPreview()
 }
 
 struct PlayerData: View {

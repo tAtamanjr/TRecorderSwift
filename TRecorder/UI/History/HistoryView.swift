@@ -34,7 +34,7 @@ struct HistoryView: View {
                                 GameHistoryPreview(game: game)
                             }
                         }
-                        .onDelete(perform: model.deleteGameFromStorage)
+                        .onDelete(perform: model.deleteGameFromContainer(at:))
                     }
                 }
             }
@@ -66,7 +66,7 @@ struct HistoryView: View {
 }
 
 #Preview {
-    HistoryView().environmentObject(Model())
+//    HistoryView().environmentObject(Model())
 }
 
 struct GameHistoryPreview: View {

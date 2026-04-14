@@ -7,9 +7,20 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 
 
 struct Previews {
+    private static var container: ModelContainer {
+        get {
+            do {
+                return try ModelContainer(for: GameHistory.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+            } catch {
+                fatalError("Failed to create container: \(error)")
+            }
+        }
+    }
+    
     private static let names: [[String]] = [
         ["Jan", "John"],
         ["Jan", "John", "Max"],
@@ -50,7 +61,7 @@ struct Previews {
         players[0].score = scores[1][0]
         players[1].score = scores[1][1]
         players.append(Player("Max", 2))
-        players[2].score = scores[0][2]
+        players[2].score = scores[1][2]
         games.append(GameHistory(players))
         players[0].score = scores[2][0]
         players[1].score = scores[2][1]
@@ -62,25 +73,44 @@ struct Previews {
     }
     
     static func mainMenuPreview() -> any View {
-        let model: Model = Model()
+        let model: Model = Model(container)
         model.games = returnGameSamples()
-        return MainMenuView(model: model)
+        return MainMenuView().environmentObject(model).modelContainer(container)
+    }
+    
+    static func newGamePreview() -> any View {
+        return NewGameView().environmentObject(Model(container))
+    }
+    
+    static func gameTurnPreview() -> any View {
+        let model: Model = Model(container)
+        model.gameData = GameData(["John", "Max", "Jim", "Dave"])
+        return GameTurnView().environmentObject(model)
+    }
+    
+    static func gameResultPreview() -> any View {
+        let gameHistory: GameHistory = GameHistory([])
+        
+        gameHistory.players.append(PlayerHistory("John", [15, 5, 7]))
+        gameHistory.players.append(PlayerHistory("Max", [10, 1, 6]))
+        gameHistory.players.append(PlayerHistory("David", [13, 6, 3]))
+        
+        return GameResultView(gameHistory: gameHistory).environmentObject(Model(container))
+    }
+
+    static    func gameDetailsView() -> any View {
+        let gameHistory: GameHistory = GameHistory([])
+        
+        gameHistory.players.append(PlayerHistory("John", [15, 5, 7]))
+        gameHistory.players.append(PlayerHistory("Max", [10, 1, 6]))
+        gameHistory.players.append(PlayerHistory("David", [13, 6, 3]))
+        
+        return GameDetailsView(gameHistory: gameHistory).environmentObject(Model(container))
     }
 }
 
-func mainMenuPreview() -> any View {
-    return MainMenuView(model: Model())
-}
 
-func newGamePreview() -> any View {
-    return NewGameView().environmentObject(Model())
-}
 
-func gameTurnPreview() -> any View {
-    let model: Model = Model()
-    model.gameData = GameData(["John", "Max", "Jim", "Dave"])
-    return GameTurnView().environmentObject(model)
-}
 
 //func gameEndViewPreview() -> any View {
 //    let gameData = GameData(["John", "Max", "David"])
@@ -96,22 +126,4 @@ func gameTurnPreview() -> any View {
 //    return GameEndView(gameData: gameData).environmentObject(Model())
 //}
 
-func gameResultPreview() -> any View {
-    let gameHistory: GameHistory = GameHistory([])
-    
-    gameHistory.players.append(PlayerHistory("John", [15, 5, 7]))
-    gameHistory.players.append(PlayerHistory("Max", [10, 1, 6]))
-    gameHistory.players.append(PlayerHistory("David", [13, 6, 3]))
-    
-    return GameResultView(gameHistory: gameHistory).environmentObject(Model())
-}
 
-func gameDetailsView() -> any View {
-    let gameHistory: GameHistory = GameHistory([])
-    
-    gameHistory.players.append(PlayerHistory("John", [15, 5, 7]))
-    gameHistory.players.append(PlayerHistory("Max", [10, 1, 6]))
-    gameHistory.players.append(PlayerHistory("David", [13, 6, 3]))
-    
-    return GameDetailsView(gameHistory: gameHistory).environmentObject(Model())
-}

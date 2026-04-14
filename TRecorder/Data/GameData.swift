@@ -8,8 +8,7 @@
 import Foundation
 import SwiftData
 
-@Model
-class GameData {
+final class GameData {
     var players: [Player]
     var dicesInThePool: Int
     var currentPlayer: Int

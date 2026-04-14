@@ -60,5 +60,5 @@ struct NewGameView: View {
 }
 
 #Preview {
-    newGamePreview()
+    Previews.newGamePreview()
 }

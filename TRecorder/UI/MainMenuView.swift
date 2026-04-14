@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct MainMenuView: View {
-    @ObservedObject var model: Model
+    @EnvironmentObject var model: Model
     
     var body: some View {
         NavigationStack(path: $model.path) {
@@ -65,6 +65,5 @@ struct MainMenuView: View {
 }
 
 #Preview {
-    MainMenuView(model: Model())
-//    Previews.mainMenuPreview()
+    Previews.mainMenuPreview()
 }
