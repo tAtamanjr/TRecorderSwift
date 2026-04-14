@@ -12,24 +12,36 @@ struct MainMenuView: View {
     @ObservedObject var model: Model
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $model.path) {
             VStack {
                 Spacer()
                 Spacer()
                 
-                NavigationLink(destination: {
-                    NewGameView().environmentObject(model)
-                }, label: {
+//                NavigationLink(destination: {
+//                    NewGameView().environmentObject(model)
+//                }, label: {
+//                    Text("Start game").font(.title2)
+//                })
+                Button(action: {
+                    model.route(Route.NewGame)
+//                    model.route("NewGame")
+                }) {
                     Text("Start game").font(.title2)
-                })
+                }
                 
                 Spacer()
                 
-                NavigationLink(destination: {
-                    HistoryView().environmentObject(model)
-                }, label: {
+//                NavigationLink(destination: {
+//                    HistoryView().environmentObject(model)
+//                }, label: {
+//                    Text("History").font(.title2)
+//                })
+                Button(action: {
+                    model.route(Route.History)
+//                    model.route("History")
+                }) {
                     Text("History").font(.title2)
-                })
+                }
                 
                 Spacer()
             }
@@ -38,10 +50,21 @@ struct MainMenuView: View {
                     Text("Main Menu").font(.title)
                 }
             }
-        }.id(model.rootId)
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .NewGame:
+                    NewGameView().environmentObject(model)
+                case .History:
+                    HistoryView().environmentObject(model)
+                default:
+                    Text("Default")
+                }
+            }
+        }
     }
 }
 
 #Preview {
-    mainMenuPreview()
+    MainMenuView(model: Model())
+//    Previews.mainMenuPreview()
 }

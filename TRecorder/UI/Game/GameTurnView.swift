@@ -10,9 +10,9 @@ import SwiftUI
 struct GameTurnView: View {
     @EnvironmentObject var model: Model
     
-    @State var gameData: GameData
-    @State var playerMove: PlayerMove = PlayerMove()
-    @State var input: Int = 0
+//    @State var gameData: GameData
+//    @State var playerMove: PlayerMove = PlayerMove()
+//    @State var input: Int = 0
     
     var body: some View {
         NavigationStack {
@@ -48,14 +48,14 @@ struct GameTurnView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     if (model.showResultView()) {
                         NavigationLink(destination: {
-                            ResultView(gameHistory: GameHistory(gameData.players)).environmentObject(model)
+                            GameResultView(gameHistory: GameHistory(model.gameData!.players)).environmentObject(model)
                         }, label: {
                             Text("End")
                         })
                     } else {
                         Button(action: {
                             withAnimation {
-                                model.submitPlayersMove()
+                                model.submitMove()
                             }
                         }) {
                             Text("Next")
@@ -72,15 +72,15 @@ struct GameTurnView: View {
                 ForEach(model.gameData!.players) { player in
                     VStack {
                         Text(player.name).padding(.bottom, 2).font(.title3)
-                        player.name != gameData.name
+                        player.name != model.gameData!.currentPlayerName
                         ? Text("Dices: \(player.dicesLeft)")
-                        : Text("Dices: \(player.dicesLeft + model.penalty.count - (model.score != -1 ? 1 : 0))")
+                        : Text("Dices: \(player.dicesLeft + model.penalty.count - (model.score != nil ? 1 : 0))")
                         Text("Score:")
                         Text(player.score.reduce(0, +).description)
                     }.padding(4)
                 }
             }.padding()
-            Text("Pool: \(gameData.pool - playerMove.penalty.count)").font(.title3)
+            Text("Pool: \(model.gameData!.dicesInThePool - model.penalty.count)").font(.title3)
         }.padding()
     }
     
@@ -92,17 +92,17 @@ struct GameTurnView: View {
                     Spacer()
                     VStack {
                         Text("Penalty:")
-                        Text(playerMove.penalty.description)
+                        Text(model.penalty.description)
                     }
                     Spacer()
                     VStack {
                         Text("Score:")
-                        Text(playerMove.score == -1 ? [].description : [playerMove.score].description)
+                        Text(model.score == nil ? [].description : [model.score!].description)
                     }
                     Spacer()
                     VStack {
                         Text("Bonus:")
-                        Text(playerMove.bonus == -1 ? [].description : [playerMove.bonus].description)
+                        Text(model.bonus == nil ? [].description : [model.bonus!].description)
                     }
                     Spacer()
                 }
@@ -113,89 +113,85 @@ struct GameTurnView: View {
     var scoreInputView: some View {
         HStack() {
             Text("Dice:").font(.title3)
-            TextField("Move", value: $input, format: .number).keyboardType(.numberPad).font(.title3)
+            TextField("Move", value: $model.input, format: .number).keyboardType(.numberPad).font(.title3)
             Button(action: {
                 withAnimation {
-                    playerMove.score = input
-                    gameData.skip = false
+                    model.submitDice()
                 }
             }) {
                 Image(systemName: "plus").font(.title3)
             }
-            .disabled(input < 0 || input > 15)
-        }.padding().disabled(gameData.skip && gameData.pool == 0)
+            .disabled(model.cannotSubmitDice())
+        }.padding().disabled(model.gameData!.skippedMove && model.gameData!.dicesInThePool == 0)
     }
     
     private var poolingView: some View {
         HStack {
-            if ((gameData.pool - playerMove.penalty.count) > 0) {
+            if (model.canTakeDice) {
                 Button(action: {
                     withAnimation {
-                        playerMove.penalty.append(-5)
-                        if (playerMove.penalty.count == 3) { gameData.skip = true }
+                        model.poolDice()
                     }
                 }) {
                     Text("Take dice").font(.title3)
-                }.disabled(playerMove.penalty.count >= 3)
+                }.disabled(model.penalty.count >= 3)
             } else {
                 Button(action: {
                     withAnimation {
-                        playerMove.skip = true
-                        gameData.skip = true
+                        model.skipTurn = true
+                        model.gameData!.skippedMove = true
                     }
                 }) {
                     Text("Skip")
-                }.disabled(playerMove.skip)
+                }.disabled(model.skipTurn)
             }
-        }.disabled(gameData.skip && !(gameData.pool - playerMove.penalty.count > 0))
+        }.disabled(model.gameData!.skippedMove && !(model.gameData!.dicesInThePool - model.penalty.count > 0))
     }
     
     private var bonusesView: some View {
         VStack {
             HStack {
                 Spacer()
-                BonusButton(playerMove: $playerMove, amount: 40)
+                Button(action: {
+                    withAnimation {
+                        model.bonus = 40
+                    }
+                }) {
+                    Text("Bridge").font(.title3)
+                }.disabled(model.score == nil || model.bonus! == 40)
                 Spacer()
-                BonusButton(playerMove: $playerMove, amount: 50)
+                Button(action: {
+                    withAnimation {
+                        model.bonus = 50
+                    }
+                }) {
+                    Text("Hexagon").font(.title3)
+                }.disabled(model.score == nil || model.bonus! == 50)
                 Spacer()
             }.padding(.bottom)
             HStack {
                 Spacer()
-                BonusButton(playerMove: $playerMove, amount: 60)
+                Button(action: {
+                    withAnimation {
+                        model.bonus = 60
+                    }
+                }) {
+                    Text("Double\nHexagon").font(.title3)
+                }.disabled(model.score == nil || model.bonus! == 60)
                 Spacer()
-                BonusButton(playerMove: $playerMove, amount: 70)
+                Button(action: {
+                    withAnimation {
+                        model.bonus = 70
+                    }
+                }) {
+                    Text("Triple\nHexagon").font(.title3)
+                }.disabled(model.score == nil || model.bonus! == 70)
                 Spacer()
             }
-        }.padding().disabled(gameData.skip && playerMove.score == -1)
+        }.padding().disabled(model.gameData!.skippedMove && model.score == nil)
     }
 }
 
 #Preview {
     gameTurnPreview()
-}
-
-struct BonusButton: View {
-    @Binding var playerMove: PlayerMove
-    let amount: Int
-    
-    var body: some View {
-        Button(action: {
-            withAnimation {
-                playerMove.bonus = amount
-            }
-        }) {
-            switch(amount) {
-            case 40:
-                Text("Bridge").font(.title3)
-            case 50:
-                Text("Hexagon").font(.title3)
-            case 60:
-                Text("Double\nHexagon").font(.title3)
-            case 70:
-                Text("Triple\nHexagon").font(.title3)
-            default:
-                Text("None").font(.title3)
-            }
-        }.disabled(playerMove.score == -1 || playerMove.bonus == amount)
-    }
 }

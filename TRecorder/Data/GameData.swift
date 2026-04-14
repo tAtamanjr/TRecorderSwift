@@ -25,7 +25,7 @@ class GameData {
         set { players[currentPlayer].dicesLeft = newValue }
         get { return players[currentPlayer].dicesLeft }
     }
-    var playersSkippedMove: Bool {
+    var skippedMove: Bool {
         set { players[currentPlayer].skippedTurn = newValue }
         get {
             for player in players {

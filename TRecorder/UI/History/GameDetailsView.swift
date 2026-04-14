@@ -1,5 +1,5 @@
 //
-//  GameHistoryView.swift
+//  GameDetailsView.swift
 //  TRecorder
 //
 //  Created by Oleksandr Bolbat on 06.04.2026.
@@ -7,8 +7,9 @@
 
 import SwiftUI
 
-struct GameHistoryView: View {
+struct GameDetailsView: View {
     @EnvironmentObject var model: Model
+    @Environment(\.dismiss) var dismiss
     
     let gameHistory: GameHistory
     
@@ -20,9 +21,17 @@ struct GameHistoryView: View {
                 }
                 Spacer()
             }
+            .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Game").font(.title)
+                }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(action: {
+                        dismiss()
+                    }, label: {
+                        Text("Back")
+                    })
                 }
             }
         }
@@ -30,5 +39,5 @@ struct GameHistoryView: View {
 }
 
 #Preview {
-    gameHistoryPreview()
+    gameDetailsView()
 }

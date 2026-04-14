@@ -1,5 +1,5 @@
 //
-//  ResultView.swift
+//  GameResultView.swift
 //  TRecorder
 //
 //  Created by Oleksandr Bolbat on 29.03.2026.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ResultView: View {
+struct GameResultView: View {
     @EnvironmentObject var model: Model
     
     let gameHistory: GameHistory
@@ -40,7 +40,7 @@ struct ResultView: View {
 }
 
 #Preview {
-    resultPreview()
+    gameResultPreview()
 }
 
 struct PlayerData: View {

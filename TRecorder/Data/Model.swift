@@ -11,6 +11,9 @@ import Combine
 
 @MainActor
 final class Model: ObservableObject {
+    // UI
+    @Published var path: NavigationPath
+    
     // Storage
     let storage: ModelContainer
     private let fetchDescriptor: FetchDescriptor<GameHistory>
@@ -27,10 +30,13 @@ final class Model: ObservableObject {
     @Published var previousPlayerMove: Int?
     @Published var penalty: [Int]
     @Published var score: Int?
+    @Published var input: Int?
     @Published var bonus: Int?
     @Published var skipTurn: Bool
     
     init() {
+        self.path = NavigationPath()
+        
         self.storage = {
             do {
                 return try ModelContainer(
@@ -52,22 +58,28 @@ final class Model: ObservableObject {
         self.previousPlayerMove = nil
         self.penalty = []
         self.score = nil
+        self.input = nil
         self.bonus = nil
         self.skipTurn = false
         
-        self.update()
+//        self.loadFromStorage()
+    }
+}
+
+//UI
+extension Model {
+    func route(_ to: Route) {
+        path.append(to)
     }
     
-    @Published var rootId: UUID = UUID()
-    
-    func reset() {
-        rootId = UUID()
+    func clearPath() {
+        path = NavigationPath()
     }
 }
 
 // Storage
 extension Model {
-    func update() {
+    func loadFromStorage() {
         games = {
             do {
                 return try storage.mainContext.fetch(fetchDescriptor).reversed()
@@ -79,15 +91,15 @@ extension Model {
     
     func addGameToStorage(_ game: GameHistory) {
         storage.mainContext.insert(game)
-        update()
-        reset()
+        loadFromStorage()
+        clearPath()
     }
     
-    func deleteGame(at offsets: IndexSet) {
+    func deleteGameFromStorage(at offsets: IndexSet) {
         for index in offsets {
             do {
                 storage.mainContext.delete(try storage.mainContext.fetch(fetchDescriptor)[index])
-                update()
+                loadFromStorage()
             } catch {
                 fatalError("Failed to delete team")
             }
@@ -105,11 +117,8 @@ extension Model {
         Model.trimmedString(name).isEmpty
     }
     
-    static func currentTimeAndDateString() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .short
-        return dateFormatter.string(from: Date())
+    static func dateToString(_ date: Date) -> String {
+        return date.formatted(.iso8601.year().month().day())
     }
 }
 
@@ -137,10 +146,36 @@ extension Model {
 //Game data
 extension Model {
     func showResultView() -> Bool {
-        return gameData!.playersSkippedMove && gameData!.dicesInThePool == 0
+        return gameData!.skippedMove && gameData!.dicesInThePool == 0
+    }
+}
+
+// Game turn
+extension Model {
+    func resetGameTurnData() {
+        penalty = []
+        score = nil
+        bonus = nil
+        skipTurn = false
     }
     
-    func submitPlayersMove() {
+    var canTakeDice: Bool { get { return (gameData!.dicesInThePool - penalty.count) > 0 } }
+    
+    func poolDice() {
+        penalty.append(-5)
+        if (penalty.count == 3) { skipTurn = true }
+    }
+    
+    func submitDice() {
+        score = input!
+        gameData!.skippedMove = false
+    }
+    
+    func cannotSubmitDice() -> Bool {
+        return (input == nil || input! < 0 || input! > 15)
+    }
+    
+    func submitMove() {
         gameData!.currentPlayerScore += (penalty +
                                          (score != nil ? [score!] : (((gameData!.dicesInThePool - penalty.count) > 0) ? [-10] : [])) +
                                          (bonus != nil ? [bonus!] : []))
@@ -154,16 +189,4 @@ extension Model {
     func cannotSubmitPlayersMove() -> Bool {
         return (score == nil) && !skipTurn && (penalty.count < 3) && gameData!.dicesInThePool - penalty.count > 0
     }
-}
-
-// Game turn
-extension Model {
-    func resetGameTurnData() {
-        penalty = []
-        score = nil
-        bonus = nil
-        skipTurn = false
-    }
-    
-    
 }

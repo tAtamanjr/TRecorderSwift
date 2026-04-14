@@ -9,9 +9,10 @@ import SwiftUI
 
 struct HistoryView: View {
     @EnvironmentObject var model: Model
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $model.path) {
             VStack {
                 if model.games.isEmpty {
                     Spacer()
@@ -22,19 +23,42 @@ struct HistoryView: View {
                 } else {
                     List {
                         ForEach(model.games) { game in
-                            NavigationLink(destination: {
-                                GameHistoryView(gameHistory: game).environmentObject(model)
-                            }, label: {
+//                            NavigationLink(destination: {
+//                                GameHistoryView(gameHistory: game).environmentObject(model)
+//                            }, label: {
+//                                GameHistoryPreview(game: game)
+//                            })
+                            Button(action: {
+                                model.route(Route.GameDetails(game))
+                            }) {
                                 GameHistoryPreview(game: game)
-                            })
+                            }
                         }
-                        .onDelete(perform: model.deleteGame)
+                        .onDelete(perform: model.deleteGameFromStorage)
                     }
                 }
             }
+            .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Games").font(.title)
+                }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(action: {
+                        dismiss()
+                    }, label: {
+                        Text("Back")
+                    })
+                }
+            }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .History:
+                    HistoryView().environmentObject(model)
+                case .GameDetails(let game):
+                    GameDetailsView(gameHistory: game).environmentObject(model)
+                default:
+                    Text("Default")
                 }
             }
         }
@@ -50,7 +74,7 @@ struct GameHistoryPreview: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(game.date).font(.title2)
+            Text(Model.dateToString(game.date)).font(.title2)
             
             HStack {
                 Text("\(game.players.count)")

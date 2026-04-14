@@ -49,7 +49,7 @@ struct NewGameView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     NavigationLink(destination: {
-                        GameTurnView(gameData: GameData(model.newGamePlayers)).environmentObject(model)
+//                        GameTurnView(gameData: GameData(model.newGamePlayers)).environmentObject(model)
                     }, label: {
                         Text("Start")
                     }).disabled(model.cannotStartGame())

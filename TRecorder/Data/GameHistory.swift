@@ -12,13 +12,13 @@ import SwiftData
 @Model
 class GameHistory {
     var id: UUID
-    var date: String
+    var date: Date
     var players: [PlayerHistory]
     
     @MainActor
     init(_ players: [Player]) {
         self.id = UUID()
-        self.date = Model.currentTimeAndDateString()
+        self.date = Date.now
         self.players = []
         for player in players {
             self.players.append(PlayerHistory(player.name, player.score))
