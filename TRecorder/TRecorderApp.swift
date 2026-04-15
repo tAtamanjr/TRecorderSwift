@@ -14,10 +14,13 @@ struct TRecorderApp: App {
     @StateObject private var model: Model
 
     init() {
+        let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+        let config = ModelConfiguration(isStoredInMemoryOnly: isPreview)
+        
         do {
             let container = try ModelContainer(
-                for: GameHistory.self,
-                configurations: ModelConfiguration()
+                for: GameHistory.self, PlayerHistory.self,
+                configurations: config
             )
             self.container = container
             _model = StateObject(wrappedValue: Model(container))
@@ -28,7 +31,9 @@ struct TRecorderApp: App {
     
     var body: some Scene {
         WindowGroup {
-            MainMenuView().environmentObject(model)
-        }.modelContainer(container)
+            MainMenuView()
+                .environmentObject(model)
+        }
+        .modelContainer(container)
     }
 }

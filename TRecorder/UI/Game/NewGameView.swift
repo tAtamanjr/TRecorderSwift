@@ -12,15 +12,17 @@ struct NewGameView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $model.path) {
             List {
                 Section("Players") {
                     ForEach(model.newGamePlayers, id: \.self) { player in
                         Text(player)
-                    }.onDelete(perform: model.removePlayer)
+                    }
+                    .onDelete(perform: model.removePlayer)
                     if (model.newGamePlayers.count < 4) {
                         HStack {
-                            TextField("Name", text: $model.newPlayerName).disableAutocorrection(true)
+                            TextField("Name", text: $model.newPlayerName)
+                                .disableAutocorrection(true)
                             
                             Spacer()
                             
@@ -30,7 +32,8 @@ struct NewGameView: View {
                                 }
                             }, label: {
                                 Image(systemName: "plus")
-                            }).disabled(model.cannotAddNewPlayer())
+                            })
+                            .disabled(model.cannotAddNewPlayer())
                         }
                     }
                 }
@@ -38,7 +41,8 @@ struct NewGameView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("New Game").font(.title)
+                    Text("New Game")
+                        .font(.title)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: {
@@ -48,11 +52,24 @@ struct NewGameView: View {
                     })
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    NavigationLink(destination: {
-//                        GameTurnView(gameData: GameData(model.newGamePlayers)).environmentObject(model)
+                    Button(action: {
+                        model.route(.GameTurn)
                     }, label: {
                         Text("Start")
-                    }).disabled(model.cannotStartGame())
+                    })
+                    .disabled(model.cannotStartGame())
+                }
+            }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .NewGame:
+                    NewGameView()
+                        .environmentObject(model)
+                case .GameTurn:
+                    GameTurnView()
+                        .environmentObject(model)
+                default:
+                    Text("Uncorrect view")
                 }
             }
         }

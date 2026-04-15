@@ -14,7 +14,7 @@ final class Model: ObservableObject {
     // UI
     @Published var path: NavigationPath
     
-    // Storage
+    // Container
     let container: ModelContainer
     private let fetchDescriptor: FetchDescriptor<GameHistory>
     var games: [GameHistory]
@@ -57,7 +57,7 @@ final class Model: ObservableObject {
     }
 }
 
-//UI
+// UI
 extension Model {
     func route(_ to: Route) {
         path.append(to)
@@ -68,7 +68,7 @@ extension Model {
     }
 }
 
-// Storage
+// Container
 extension Model {
     func loadFromContainer() {
         games = {
@@ -80,7 +80,7 @@ extension Model {
         }()
     }
     
-    func addGameToStorage(_ game: GameHistory) {
+    func addGameToContainer(_ game: GameHistory) {
         container.mainContext.insert(game)
         loadFromContainer()
         clearPath()

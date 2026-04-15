@@ -23,12 +23,13 @@ struct GameResultView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Result").font(.title)
+                    Text("Result")
+                        .font(.title)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {
                         withAnimation {
-                            model.addGameToStorage(gameHistory)
+                            model.addGameToContainer(gameHistory)
                         }
                     }) {
                         Text("End")
@@ -60,6 +61,7 @@ struct PlayerData: View {
                 Text("Score: " + player.score.description)
                 Spacer()
             }
-        }.padding()
+        }
+        .padding()
     }
 }

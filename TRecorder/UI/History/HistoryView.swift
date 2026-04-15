@@ -23,16 +23,12 @@ struct HistoryView: View {
                 } else {
                     List {
                         ForEach(model.games) { game in
-//                            NavigationLink(destination: {
-//                                GameHistoryView(gameHistory: game).environmentObject(model)
-//                            }, label: {
-//                                GameHistoryPreview(game: game)
-//                            })
                             Button(action: {
-                                model.route(Route.GameDetails(game))
+                                model.route(.GameDetails(game))
                             }) {
-                                GameHistoryPreview(game: game)
+                                GameDetailsPreview(game: game)
                             }
+                            .buttonStyle(.plain)
                         }
                         .onDelete(perform: model.deleteGameFromContainer(at:))
                     }
@@ -41,7 +37,8 @@ struct HistoryView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Games").font(.title)
+                    Text("Games")
+                        .font(.title)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: {
@@ -54,11 +51,13 @@ struct HistoryView: View {
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .History:
-                    HistoryView().environmentObject(model)
+                    HistoryView()
+                        .environmentObject(model)
                 case .GameDetails(let game):
-                    GameDetailsView(gameHistory: game).environmentObject(model)
+                    GameDetailsView(gameHistory: game)
+                        .environmentObject(model)
                 default:
-                    Text("Default")
+                    Text("Uncorrect view")
                 }
             }
         }
@@ -66,29 +65,34 @@ struct HistoryView: View {
 }
 
 #Preview {
-//    HistoryView().environmentObject(Model())
+    Previews.historyPreview()
 }
 
-struct GameHistoryPreview: View {
+struct GameDetailsPreview: View {
     var game: GameHistory
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(Model.dateToString(game.date)).font(.title2)
-            
-            HStack {
-                Text("\(game.players.count)")
-                if game.players.count == 2 {
-                    Image(systemName: "person.2")
-                } else {
-                    Image(systemName: "person.line.dotted.person")
+        HStack {
+            VStack(alignment: .leading) {
+                Text(Model.dateToString(game.date))
+                    .font(.title2)
+                
+                HStack {
+                    Text("\(game.players.count)")
+                    switch game.players.count {
+                    case 2:
+                        Image(systemName: "person.2")
+                    case 3:
+                        Image(systemName: "person.3.sequence")
+                    default:
+                        Image(systemName: "person.line.dotted.person")
+                    }
                 }
-                
-                Spacer()
-                
-                Text(game.players[0].name)
-                Image(systemName: "flag.and.flag.filled.crossed")
             }
+            Spacer()
+            Text(game.players[0].name)
+            Image(systemName: "flag.and.flag.filled.crossed")
+            Image(systemName: "arrowshape.right")
         }
     }
 }

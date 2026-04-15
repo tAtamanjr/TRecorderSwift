@@ -17,47 +17,40 @@ struct MainMenuView: View {
                 Spacer()
                 Spacer()
                 
-//                NavigationLink(destination: {
-//                    NewGameView().environmentObject(model)
-//                }, label: {
-//                    Text("Start game").font(.title2)
-//                })
                 Button(action: {
-                    model.route(Route.NewGame)
-//                    model.route("NewGame")
+                    model.route(.NewGame)
                 }) {
-                    Text("Start game").font(.title2)
+                    Text("Start game")
+                        .font(.title2)
                 }
                 
                 Spacer()
                 
-//                NavigationLink(destination: {
-//                    HistoryView().environmentObject(model)
-//                }, label: {
-//                    Text("History").font(.title2)
-//                })
                 Button(action: {
-                    model.route(Route.History)
-//                    model.route("History")
+                    model.route(.History)
                 }) {
-                    Text("History").font(.title2)
+                    Text("History")
+                        .font(.title2)
                 }
                 
                 Spacer()
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Main Menu").font(.title)
+                    Text("Main Menu")
+                        .font(.title)
                 }
             }
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .NewGame:
-                    NewGameView().environmentObject(model)
+                    NewGameView()
+                        .environmentObject(model)
                 case .History:
-                    HistoryView().environmentObject(model)
+                    HistoryView()
+                        .environmentObject(model)
                 default:
-                    Text("Default")
+                    Text("Uncorrect view")
                 }
             }
         }

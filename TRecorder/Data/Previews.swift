@@ -14,9 +14,12 @@ struct Previews {
     private static var container: ModelContainer {
         get {
             do {
-                return try ModelContainer(for: GameHistory.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+                return try ModelContainer(
+                    for: GameHistory.self, PlayerHistory.self,
+                    configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+                )
             } catch {
-                fatalError("Failed to create container: \(error)")
+                preconditionFailure("Preview container failed: \(error)")
             }
         }
     }
@@ -50,80 +53,70 @@ struct Previews {
         ]
     ]
     
-    static func returnGameSamples() -> [GameHistory] {
-        var games: [GameHistory] = []
+    static func addGameSamples(_ model: Model) {
         var players: [Player] = []
         players.append(Player("Jan", 2))
         players[0].score = scores[0][0]
         players.append(Player("John", 2))
         players[1].score = scores[0][1]
-        games.append(GameHistory(players))
+        model.addGameToContainer(GameHistory(players))
         players[0].score = scores[1][0]
         players[1].score = scores[1][1]
         players.append(Player("Max", 2))
         players[2].score = scores[1][2]
-        games.append(GameHistory(players))
+        model.addGameToContainer(GameHistory(players))
         players[0].score = scores[2][0]
         players[1].score = scores[2][1]
         players[2].score = scores[2][2]
         players.append(Player("Jim", 2))
         players[3].score = scores[2][3]
-        games.append(GameHistory(players))
-        return games
+        model.addGameToContainer(GameHistory(players))
+        model.loadFromContainer()
     }
     
     static func mainMenuPreview() -> any View {
         let model: Model = Model(container)
-        model.games = returnGameSamples()
+        addGameSamples(model)
         return MainMenuView().environmentObject(model).modelContainer(container)
     }
     
     static func newGamePreview() -> any View {
-        return NewGameView().environmentObject(Model(container))
+        let model: Model = Model(container)
+        return NewGameView().environmentObject(model).modelContainer(container)
     }
     
     static func gameTurnPreview() -> any View {
         let model: Model = Model(container)
         model.gameData = GameData(["John", "Max", "Jim", "Dave"])
-        return GameTurnView().environmentObject(model)
+        return GameTurnView().environmentObject(model).modelContainer(container)
     }
     
+//    static func gameEndPreview() -> any View {
+//        let model: Model = Model(container)
+//        return GameEndView().environmentObject(model).modelContainer(container)
+//    }
+    
     static func gameResultPreview() -> any View {
-        let gameHistory: GameHistory = GameHistory([])
+        let model: Model = Model(container)
         
-        gameHistory.players.append(PlayerHistory("John", [15, 5, 7]))
-        gameHistory.players.append(PlayerHistory("Max", [10, 1, 6]))
-        gameHistory.players.append(PlayerHistory("David", [13, 6, 3]))
+        var players: [Player] = []
+        players.append(Player("Jan", 2))
+        players[0].score = scores[0][0]
+        players.append(Player("John", 2))
+        players[1].score = scores[0][1]
         
-        return GameResultView(gameHistory: gameHistory).environmentObject(Model(container))
+        return GameResultView(gameHistory: GameHistory(players)).environmentObject(model).modelContainer(container)
     }
-
-    static    func gameDetailsView() -> any View {
-        let gameHistory: GameHistory = GameHistory([])
-        
-        gameHistory.players.append(PlayerHistory("John", [15, 5, 7]))
-        gameHistory.players.append(PlayerHistory("Max", [10, 1, 6]))
-        gameHistory.players.append(PlayerHistory("David", [13, 6, 3]))
-        
-        return GameDetailsView(gameHistory: gameHistory).environmentObject(Model(container))
+    
+    static func historyPreview() -> any View {
+        let model: Model = Model(container)
+        addGameSamples(model)
+        return HistoryView().environmentObject(model).modelContainer(container)
+    }
+    
+    static func gameDetailsPreview() -> any View {
+        let model: Model = Model(container)
+        addGameSamples(model)
+        return GameDetailsView(gameHistory: model.games[0]).environmentObject(model).modelContainer(container)
     }
 }
-
-
-
-
-//func gameEndViewPreview() -> any View {
-//    let gameData = GameData(["John", "Max", "David"])
-//    
-//    gameData.players[0].score = [55]
-//    gameData.players[1].score = [75]
-//    gameData.players[2].score = [65]
-//
-//    gameData.players[0].dices = 0
-//    gameData.players[1].dices = 5
-//    gameData.players[2].dices = 1
-//    
-//    return GameEndView(gameData: gameData).environmentObject(Model())
-//}
-
-

@@ -14,7 +14,7 @@ struct GameDetailsView: View {
     let gameHistory: GameHistory
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $model.path) {
             VStack {
                 ForEach(gameHistory.players) { player in
                     PlayerData(player: player)
@@ -24,7 +24,8 @@ struct GameDetailsView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Game").font(.title)
+                    Text("Game")
+                        .font(.title)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: {
@@ -34,10 +35,19 @@ struct GameDetailsView: View {
                     })
                 }
             }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .GameDetails(let game):
+                    GameDetailsView(gameHistory: game)
+                        .environmentObject(model)
+                default:
+                    Text("Uncorrect view")
+                }
+            }
         }
     }
 }
 
 #Preview {
-    Previews.gameDetailsView()
+    Previews.gameDetailsPreview()
 }

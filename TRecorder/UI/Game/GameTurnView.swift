@@ -36,7 +36,8 @@ struct GameTurnView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("\(model.gameData!.currentPlayerName)'s Turn").font(.title)
+                    Text("\(model.gameData!.currentPlayerName)'s Turn")
+                        .font(.title)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: {
@@ -48,7 +49,8 @@ struct GameTurnView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     if (model.showResultView()) {
                         NavigationLink(destination: {
-                            GameResultView(gameHistory: GameHistory(model.gameData!.players)).environmentObject(model)
+                            GameResultView(gameHistory: GameHistory(model.gameData!.players))
+                                .environmentObject(model)
                         }, label: {
                             Text("End")
                         })
@@ -59,7 +61,8 @@ struct GameTurnView: View {
                             }
                         }) {
                             Text("Next")
-                        }.disabled(model.cannotSubmitPlayersMove())
+                        }
+                        .disabled(model.cannotSubmitPlayersMove())
                     }
                 }
             }
@@ -71,17 +74,22 @@ struct GameTurnView: View {
             HStack {
                 ForEach(model.gameData!.players) { player in
                     VStack {
-                        Text(player.name).padding(.bottom, 2).font(.title3)
+                        Text(player.name)
+                            .padding(.bottom, 2)
+                            .font(.title3)
                         player.name != model.gameData!.currentPlayerName
                         ? Text("Dices: \(player.dicesLeft)")
                         : Text("Dices: \(player.dicesLeft + model.penalty.count - (model.score != nil ? 1 : 0))")
                         Text("Score:")
                         Text(player.score.reduce(0, +).description)
-                    }.padding(4)
+                    }
+                    .padding(4)
                 }
-            }.padding()
+            }
+            .padding()
             Text("Pool: \(model.gameData!.dicesInThePool - model.penalty.count)").font(.title3)
-        }.padding()
+        }
+        .padding()
     }
     
     private var currentMoveView: some View {
@@ -107,19 +115,24 @@ struct GameTurnView: View {
                     Spacer()
                 }
             }
-        }.padding()
+        }
+        .padding()
     }
     
     var scoreInputView: some View {
         HStack() {
-            Text("Dice:").font(.title3)
-            TextField("Move", value: $model.input, format: .number).keyboardType(.numberPad).font(.title3)
+            Text("Dice:")
+                .font(.title3)
+            TextField("Move", value: $model.input, format: .number)
+                .keyboardType(.numberPad)
+                .font(.title3)
             Button(action: {
                 withAnimation {
                     model.submitDice()
                 }
             }) {
-                Image(systemName: "plus").font(.title3)
+                Image(systemName: "plus")
+                    .font(.title3)
             }
             .disabled(model.cannotSubmitDice())
         }.padding().disabled(model.gameData!.skippedMove && model.gameData!.dicesInThePool == 0)
@@ -133,8 +146,10 @@ struct GameTurnView: View {
                         model.poolDice()
                     }
                 }) {
-                    Text("Take dice").font(.title3)
-                }.disabled(model.penalty.count >= 3)
+                    Text("Take dice")
+                        .font(.title3)
+                }
+                .disabled(model.penalty.count >= 3)
             } else {
                 Button(action: {
                     withAnimation {
@@ -143,9 +158,11 @@ struct GameTurnView: View {
                     }
                 }) {
                     Text("Skip")
-                }.disabled(model.skipTurn)
+                }
+                .disabled(model.skipTurn)
             }
-        }.disabled(model.gameData!.skippedMove && !(model.gameData!.dicesInThePool - model.penalty.count > 0))
+        }
+        .disabled(model.gameData!.skippedMove && !(model.gameData!.dicesInThePool - model.penalty.count > 0))
     }
     
     private var bonusesView: some View {
@@ -157,7 +174,8 @@ struct GameTurnView: View {
                         model.bonus = 40
                     }
                 }) {
-                    Text("Bridge").font(.title3)
+                    Text("Bridge")
+                        .font(.title3)
                 }.disabled(model.score == nil || model.bonus! == 40)
                 Spacer()
                 Button(action: {
@@ -165,7 +183,8 @@ struct GameTurnView: View {
                         model.bonus = 50
                     }
                 }) {
-                    Text("Hexagon").font(.title3)
+                    Text("Hexagon")
+                        .font(.title3)
                 }.disabled(model.score == nil || model.bonus! == 50)
                 Spacer()
             }.padding(.bottom)
@@ -176,7 +195,8 @@ struct GameTurnView: View {
                         model.bonus = 60
                     }
                 }) {
-                    Text("Double\nHexagon").font(.title3)
+                    Text("Double\nHexagon")
+                        .font(.title3)
                 }.disabled(model.score == nil || model.bonus! == 60)
                 Spacer()
                 Button(action: {
@@ -184,11 +204,15 @@ struct GameTurnView: View {
                         model.bonus = 70
                     }
                 }) {
-                    Text("Triple\nHexagon").font(.title3)
-                }.disabled(model.score == nil || model.bonus! == 70)
+                    Text("Triple\nHexagon")
+                        .font(.title3)
+                }
+                .disabled(model.score == nil || model.bonus! == 70)
                 Spacer()
             }
-        }.padding().disabled(model.gameData!.skippedMove && model.score == nil)
+        }
+        .padding()
+        .disabled(model.gameData!.skippedMove && model.score == nil)
     }
 }
 
