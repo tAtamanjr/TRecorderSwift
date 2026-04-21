@@ -10,12 +10,8 @@ import SwiftUI
 struct GameTurnView: View {
     @EnvironmentObject var model: Model
     
-//    @State var gameData: GameData
-//    @State var playerMove: PlayerMove = PlayerMove()
-//    @State var input: Int = 0
-    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $model.path) {
             VStack {
                 playersDataView
                 
@@ -48,9 +44,8 @@ struct GameTurnView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if (model.showResultView()) {
-                        NavigationLink(destination: {
-                            GameResultView(gameHistory: GameHistory(model.gameData!.players))
-                                .environmentObject(model)
+                        Button(action: {
+                            model.route(.GameResult(GameHistory(model.gameData!.players)))
                         }, label: {
                             Text("End")
                         })
@@ -64,6 +59,21 @@ struct GameTurnView: View {
                         }
                         .disabled(model.cannotSubmitPlayersMove())
                     }
+                }
+            }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .GameTurn:
+                    GameTurnView()
+                        .environmentObject(model)
+                case .GameEnd:
+                    GameEndView(gameData: GameData([]))
+                        .environmentObject(model)
+                case .GameResult(let gameHistory):
+                    GameResultView(gameHistory: gameHistory)
+                        .environmentObject(model)
+                default:
+                    Text("Uncorrect view")
                 }
             }
         }

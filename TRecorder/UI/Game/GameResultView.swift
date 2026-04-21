@@ -13,7 +13,7 @@ struct GameResultView: View {
     let gameHistory: GameHistory
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $model.path) {
             VStack {
                 ForEach(gameHistory.players) { player in
                     PlayerData(player: player)
@@ -34,6 +34,15 @@ struct GameResultView: View {
                     }) {
                         Text("End")
                     }
+                }
+            }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .GameResult(_):
+                    GameResultView(gameHistory: gameHistory)
+                        .environmentObject(model)
+                default:
+                    Text("Uncorrect view")
                 }
             }
         }

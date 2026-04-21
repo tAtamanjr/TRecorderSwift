@@ -91,10 +91,10 @@ struct Previews {
         return GameTurnView().environmentObject(model).modelContainer(container)
     }
     
-//    static func gameEndPreview() -> any View {
-//        let model: Model = Model(container)
-//        return GameEndView().environmentObject(model).modelContainer(container)
-//    }
+    static func gameEndPreview() -> any View {
+        let model: Model = Model(container)
+        return GameEndView(gameData: GameData([])).environmentObject(model).modelContainer(container)
+    }
     
     static func gameResultPreview() -> any View {
         let model: Model = Model(container)
